@@ -1,0 +1,20 @@
+Peter Czupil
+Ian Gudger
+CMPS 181 Project 3 Report
+
+
+Design:
+	
+	We designed the index manager with the assumption that the number of duplicate keys would not be very large and that at least two keys will fit on a page. This simplified the implementation of our design significantly. The index manager uses a simple B+ tree format for quick access of data/index entries, as explained in “Database Management Systems” by Ramakrishnan et al. Our design includes the ability to create/destroy/open/close a paged file containing entries indexed on a certain attribute for a given database table/relation. The index manager also has the ability to add and delete entries from these index files. Lastly, the index manager can retrieve multiple entries from the index file, based on a criterion, using an iterator object.
+
+Implementation:
+
+	As with the previous projects, we used memory mapped file I/O for manipulating files. This is done through the use of Qt's (cross-platform application framework) QFile library. 
+
+	Most of the member functions for both the index manager and iterator aren't very interesting however the insertion and deletion (even though we mostly followed the pseudocode for these operations) of entries is worth mentioning. Regarding these operations, we broke the pseudocode up into a few separate functions to make the code more readable and easier to debug. Both insertion and deletion use recursive calls to navigate the B+ tree in order to find the correct position for insertion/deletion. Entries are inserted/deleted via memcpy() or memmove(), if the current page is full then a new page is requested. If after a deletion the page becomes empty then the page is re-purposed for new entries.
+
+	The creation of index files is interesting as well. A meta page is created first, which stores the pageID of the first non-leaf index page (the meta page may be used to store statistics about the index however this has not been implemented). The first non-leaf page is created next, along with the first leaf (data) page.
+
+	To simplify the implementation, we allocate the maximum attribute size on both leaf and non-leaf nodes.
+
+	Our scan iterator uses a C++ vector to store requested data entries. After adding all of the matching entries, the vector is sorted on RID to emulate a clustered index. GetNextEntry() pops a record off of the end of the vector and returns it to the caller.
